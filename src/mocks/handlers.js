@@ -1,4 +1,4 @@
-import { rest } from 'msw';
+import { http, HttpResponse, delay } from 'msw';
 import productsData, { facets as staticFacets } from 'shared/data/products';
 
 function filterSortPaginate({ q = '', filters = {}, sort = 'relevance', page = 1, pageSize = 12 }) {
@@ -25,16 +25,17 @@ function filterSortPaginate({ q = '', filters = {}, sort = 'relevance', page = 1
 }
 
 export const handlers = [
-  rest.get('/products', (req, res, ctx) => {
-    const q = req.url.searchParams.get('q') || '';
-    const sort = req.url.searchParams.get('sort') || 'relevance';
-    const page = Number(req.url.searchParams.get('page') || '1');
-    const pageSize = Number(req.url.searchParams.get('pageSize') || '12');
-    const categories = req.url.searchParams.getAll('categories');
-    const brands = req.url.searchParams.getAll('brands');
-    const priceMin = Number(req.url.searchParams.get('priceMin') || '0');
-    const priceMax = Number(req.url.searchParams.get('priceMax') || '100');
-    const rating = req.url.searchParams.getAll('rating').map((r) => Number(r));
+  http.get('/products', async ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q') || '';
+    const sort = url.searchParams.get('sort') || 'relevance';
+    const page = Number(url.searchParams.get('page') || '1');
+    const pageSize = Number(url.searchParams.get('pageSize') || '12');
+    const categories = url.searchParams.getAll('categories');
+    const brands = url.searchParams.getAll('brands');
+    const priceMin = Number(url.searchParams.get('priceMin') || '0');
+    const priceMax = Number(url.searchParams.get('priceMax') || '100');
+    const rating = url.searchParams.getAll('rating').map((r) => Number(r));
 
     const { items, total, totalPages } = filterSortPaginate({
       q,
@@ -43,15 +44,18 @@ export const handlers = [
       pageSize,
       filters: { categories, brands, price: [priceMin, priceMax], rating },
     });
-    return res(ctx.delay(300), ctx.status(200), ctx.json({ items, total, totalPages }));
+    await delay(300);
+    return HttpResponse.json({ items, total, totalPages }, { status: 200 });
   }),
 
-  rest.get('/products/facets', (_req, res, ctx) => {
-    return res(ctx.delay(150), ctx.status(200), ctx.json(staticFacets));
+  http.get('/products/facets', async () => {
+    await delay(150);
+    return HttpResponse.json(staticFacets, { status: 200 });
   }),
 
-  rest.get('/search', (req, res, ctx) => {
-    const q = (req.url.searchParams.get('q') || '').toLowerCase().trim();
+  http.get('/search', async ({ request }) => {
+    const url = new URL(request.url);
+    const q = (url.searchParams.get('q') || '').toLowerCase().trim();
     const titles = productsData.map((p) => p.title);
     let suggestions = [];
     if (q) {
@@ -61,6 +65,7 @@ export const handlers = [
     } else {
       suggestions = titles.slice(0, 6);
     }
-    return res(ctx.delay(150), ctx.status(200), ctx.json({ suggestions }));
+    await delay(150);
+    return HttpResponse.json({ suggestions }, { status: 200 });
   }),
 ];
