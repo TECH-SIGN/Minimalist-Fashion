@@ -7,6 +7,7 @@ import { AppThemeProvider } from './theme';
 import { CartProvider } from './state/CartContext';
 import { WishlistProvider } from './state/WishlistContext';
 import { UIProvider } from './state/UIContext';
+import { AuthProvider } from './state/AuthContext';
 
 // Start MSW in development to mock API endpoints
 if (process.env.NODE_ENV === 'development') {
@@ -23,13 +24,15 @@ root.render(
     <AppThemeProvider>
       <CssBaseline />
       <UIProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </WishlistProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
       </UIProvider>
     </AppThemeProvider>
   </React.StrictMode>

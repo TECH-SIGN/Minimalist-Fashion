@@ -1,8 +1,9 @@
 import { http, HttpResponse, delay } from 'msw';
-import productsData, { facets as staticFacets } from 'shared/data/products';
+import { getAllProducts, getFacets as getDynamicFacets } from 'services/productsStore';
 
 function filterSortPaginate({ q = '', filters = {}, sort = 'relevance', page = 1, pageSize = 12 }) {
   const { categories = [], brands = [], price = [0, 100], rating = [] } = filters;
+  const productsData = getAllProducts();
   const filtered = productsData
     .filter((p) => p.title.toLowerCase().includes(q.toLowerCase()))
     .filter((p) => (categories.length ? categories.includes(p.category) : true))
@@ -50,13 +51,13 @@ export const handlers = [
 
   http.get('/products/facets', async () => {
     await delay(150);
-    return HttpResponse.json(staticFacets, { status: 200 });
+    return HttpResponse.json(getDynamicFacets(), { status: 200 });
   }),
 
   http.get('/search', async ({ request }) => {
     const url = new URL(request.url);
     const q = (url.searchParams.get('q') || '').toLowerCase().trim();
-    const titles = productsData.map((p) => p.title);
+    const titles = getAllProducts().map((p) => p.title);
     let suggestions = [];
     if (q) {
       const starts = titles.filter((t) => t.toLowerCase().startsWith(q));

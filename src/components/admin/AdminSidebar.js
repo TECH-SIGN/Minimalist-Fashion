@@ -10,40 +10,140 @@ import InventoryIcon from '@mui/icons-material/Inventory2Outlined';
 import ReceiptIcon from '@mui/icons-material/ReceiptLongOutlined';
 import PeopleIcon from '@mui/icons-material/PeopleOutline';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
+import DesignIcon from '@mui/icons-material/DesignServicesOutlined';
 import { Link, useLocation } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
+import Tooltip from '@mui/material/Tooltip';
 
 const drawerWidth = 240;
+const railWidth = 72;
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ open, onClose }) {
   const { pathname } = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const items = [
     { to: '/admin', label: 'Dashboard', icon: <DashboardIcon /> },
     { to: '/admin/products', label: 'Products', icon: <InventoryIcon /> },
     { to: '/admin/orders', label: 'Orders', icon: <ReceiptIcon /> },
     { to: '/admin/users', label: 'Users', icon: <PeopleIcon /> },
+    { to: '/admin/customize-home', label: 'Customize Home', icon: <DesignIcon /> },
     { to: '/admin/settings', label: 'Settings', icon: <SettingsIcon /> },
   ];
 
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' },
-      }}
-      open
-    >
-      <List>
-        {items.map((it) => (
-          <ListItem key={it.to} disablePadding>
-            <ListItemButton component={Link} to={it.to} selected={pathname === it.to}>
-              <ListItemIcon>{it.icon}</ListItemIcon>
-              <ListItemText primary={it.label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+    <>
+      {/* Permanent mini rail on desktop to avoid layout shifting */}
+      <Drawer
+        variant={isMobile ? 'temporary' : 'permanent'}
+        open={isMobile ? open : true}
+        onClose={onClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          width: railWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: railWidth,
+            boxSizing: 'border-box',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+          },
+        }}
+      >
+        <Box sx={{ px: 2, py: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>E-Shop Admin</Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', md: 'none' } }}>Manage store</Typography>
+        </Box>
+        <Divider />
+        <List sx={{ pt: 0 }} role="navigation" aria-label="Admin Navigation">
+          {items.map((it) => {
+            const active = pathname === it.to || pathname.startsWith(it.to + '/');
+            return (
+              <ListItem key={it.to} disablePadding>
+                <Tooltip title={it.label} placement="right" arrow>
+                  <ListItemButton
+                    component={Link}
+                    to={it.to}
+                    selected={active}
+                    sx={{
+                      borderRadius: 1,
+                      mx: 1,
+                      my: 0.5,
+                      justifyContent: 'center',
+                      ...(active && {
+                        bgcolor: 'action.selected',
+                        '&:hover': { bgcolor: 'action.selected' },
+                      }),
+                    }}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    <ListItemIcon sx={{ minWidth: 40, mr: 0, justifyContent: 'center' }}>{it.icon}</ListItemIcon>
+                  </ListItemButton>
+                </Tooltip>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Drawer>
+
+      {/* Overlay drawer for expanded navigation on desktop, and the normal temporary drawer on mobile */}
+      <Drawer
+        variant="temporary"
+        open={open}
+        onClose={onClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'block' },
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+          },
+        }}
+      >
+        <Box sx={{ px: 2, py: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>E-Shop Admin</Typography>
+        <Typography variant="caption" color="text.secondary">Manage store</Typography>
+      </Box>
+      <Divider />
+      <List sx={{ pt: 0 }} role="navigation" aria-label="Admin Navigation">
+        {items.map((it) => {
+          const active = pathname === it.to || pathname.startsWith(it.to + '/');
+          return (
+            <ListItem key={it.to} disablePadding>
+              <Tooltip title="" placement="right" arrow>
+                <ListItemButton
+                  component={Link}
+                  to={it.to}
+                  selected={active}
+                  sx={{
+                    borderRadius: 1,
+                    mx: 1,
+                    my: 0.5,
+                    justifyContent: 'initial',
+                    ...(active && {
+                      bgcolor: 'action.selected',
+                      '&:hover': { bgcolor: 'action.selected' },
+                    }),
+                  }}
+                  onClick={onClose}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <ListItemIcon sx={{ minWidth: 40, mr: 1, justifyContent: 'center' }}>{it.icon}</ListItemIcon>
+                  <ListItemText primary={it.label} />
+                </ListItemButton>
+              </Tooltip>
+            </ListItem>
+          );
+        })}
       </List>
-    </Drawer>
+      </Drawer>
+    </>
   );
 }

@@ -25,6 +25,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useCart } from 'state/CartContext';
 import { fetchProducts, fetchFacets } from 'services/productsApi';
 import FilterSidebar from 'components/filters/FilterSidebar';
+import { getProductImage, onImgErrorSwap } from 'core/utils/imageForProduct';
 
 function ProductCard({ product, onAdd, onQuick }) {
   return (
@@ -44,9 +45,10 @@ function ProductCard({ product, onAdd, onQuick }) {
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
-          src={`https://picsum.photos/seed/${product.id}/600/600`}
+          src={getProductImage(product, { w: 600, h: 600 })}
           alt={product.title}
           loading="lazy"
+          onError={(e) => onImgErrorSwap(e, product, { w: 600, h: 600 })}
           sx={{ aspectRatio: '1 / 1', bgcolor: 'action.hover', objectFit: 'cover', width: '100%' }}
         />
         <Box
@@ -85,6 +87,7 @@ function ProductsPage() {
   const [totalPages, setTotalPages] = React.useState(1);
   const [available, setAvailable] = React.useState({ categories: [], brands: [] });
   const [quick, setQuick] = React.useState(null);
+  const [dataVersion, setDataVersion] = React.useState(0);
 
   const q = searchParams.get('q') || '';
 
@@ -100,7 +103,13 @@ function ProductsPage() {
       setLoading(false);
     });
     return () => { ignore = true; };
-  }, [q, JSON.stringify(filters), sort, page]);
+  }, [q, JSON.stringify(filters), sort, page, dataVersion]);
+
+  React.useEffect(() => {
+    const onUpdate = () => setDataVersion((v) => v + 1);
+    window.addEventListener('products:updated', onUpdate);
+    return () => window.removeEventListener('products:updated', onUpdate);
+  }, []);
 
   React.useEffect(() => {
     fetchFacets().then((f) => setAvailable({ categories: f.categories, brands: f.brands }));
@@ -142,15 +151,21 @@ function ProductsPage() {
       <Dialog open={Boolean(quick)} onClose={() => setQuick(null)} fullWidth maxWidth="sm">
         <DialogTitle>{quick?.title}</DialogTitle>
         <DialogContent dividers>
-          <Box sx={{
-            borderRadius: 2,
-            height: 280,
-            backgroundColor: 'action.hover',
-            backgroundImage: `url(https://picsum.photos/seed/${quick?.id || 'q'}/800/600)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            mb: 2,
-          }} />
+          <Box
+            component="img"
+            src={quick ? getProductImage(quick, { w: 800, h: 600, index: 0 }) : undefined}
+            alt={quick?.title || 'preview'}
+            loading="lazy"
+            onError={(e) => quick && onImgErrorSwap(e, quick, { w: 800, h: 600, index: 0 })}
+            sx={{
+              borderRadius: 2,
+              height: 280,
+              width: '100%',
+              backgroundColor: 'action.hover',
+              objectFit: 'cover',
+              mb: 2,
+            }}
+          />
           <Stack spacing={1}>
             <Rating value={quick?.rating || 4} precision={0.5} readOnly />
             <Typography variant="h6">${quick?.price?.toFixed(2)}</Typography>

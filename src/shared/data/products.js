@@ -1,5 +1,5 @@
 const categories = ['Electronics', 'Fashion', 'Home', 'Sports', 'Beauty'];
-const brands = ['Acme', 'Globex', 'Umbrella', 'Soylent', 'Initech'];
+const brands = ['Levis', 'Ralph Lauren', 'U S Polo', 'Luis Vuitton', 'Dior','Rolex'];
 const colors = ['Red', 'Blue', 'Black', 'White', 'Green'];
 const sizes = ['XS', 'S', 'M', 'L', 'XL'];
 

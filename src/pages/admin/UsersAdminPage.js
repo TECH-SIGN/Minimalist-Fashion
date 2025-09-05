@@ -26,8 +26,8 @@ export default function UsersAdminPage() {
   const setRole = (id, role) => setRows(prev => prev.map(r => r.id === id ? { ...r, role } : r));
 
   return (
-    <Box>
-      <Typography variant="h6" sx={{ mb: 2 }}>Users</Typography>
+    <Box sx={{ mt: 0 }}>
+      <Typography variant="h6" sx={{ mt: 0, mb: 1.25 }}>Users</Typography>
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>

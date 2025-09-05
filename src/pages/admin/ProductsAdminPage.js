@@ -16,37 +16,47 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import products from 'shared/data/products';
+import { getAllProducts, upsertProduct, removeProduct as storeRemove } from 'services/productsStore';
 
 export default function ProductsAdminPage() {
   const [q, setQ] = React.useState('');
-  const [rows, setRows] = React.useState(products.slice(0, 20));
+  const [rows, setRows] = React.useState(getAllProducts().slice(0, 50));
   const [open, setOpen] = React.useState(false);
-  const [form, setForm] = React.useState({ id: '', title: '', price: '', brand: '', category: '' });
+  const [form, setForm] = React.useState({ id: '', title: '', price: '', brand: '', category: '', image: '' });
 
   const filtered = rows.filter(r => r.title.toLowerCase().includes(q.toLowerCase()));
 
   const openCreate = () => {
-    setForm({ id: '', title: '', price: '', brand: '', category: '' });
+    setForm({ id: '', title: '', price: '', brand: '', category: '', image: '' });
     setOpen(true);
   };
 
   const save = () => {
     if (!form.title.trim() || !form.price) return;
     const id = form.id || Date.now();
-    const next = { ...form, id, price: Number(form.price) };
-    setRows((prev) => {
-      const exists = prev.some(p => String(p.id) === String(id));
-      return exists ? prev.map(p => (String(p.id) === String(id) ? next : p)) : [next, ...prev];
-    });
+    const next = upsertProduct({ ...form, id, price: Number(form.price) });
+    // Refresh from store to reflect latest state
+    setRows(getAllProducts().slice(0, 50));
     setOpen(false);
   };
 
   const edit = (r) => {
-    setForm({ id: r.id, title: r.title, price: r.price, brand: r.brand || '', category: r.category || '' });
+    setForm({ id: r.id, title: r.title, price: r.price, brand: r.brand || '', category: r.category || '', image: r.image || '' });
     setOpen(true);
   };
 
-  const remove = (id) => setRows((prev) => prev.filter(p => p.id !== id));
+  const remove = (id) => {
+    storeRemove(id);
+    setRows(getAllProducts().slice(0, 50));
+  };
+
+  const onFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setForm((f) => ({ ...f, image: reader.result }));
+    reader.readAsDataURL(file);
+  };
 
   return (
     <Box>
@@ -61,6 +71,7 @@ export default function ProductsAdminPage() {
         <Table size="small">
           <TableHead>
             <TableRow>
+              <TableCell>Image</TableCell>
               <TableCell>Title</TableCell>
               <TableCell>Brand</TableCell>
               <TableCell>Category</TableCell>
@@ -71,6 +82,13 @@ export default function ProductsAdminPage() {
           <TableBody>
             {filtered.map((r) => (
               <TableRow key={r.id} hover>
+                <TableCell>
+                  {r.image ? (
+                    <Box component="img" src={r.image} alt={r.title} sx={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 1 }} />
+                  ) : (
+                    <Box sx={{ width: 48, height: 48, bgcolor: 'action.hover', borderRadius: 1 }} />
+                  )}
+                </TableCell>
                 <TableCell>{r.title}</TableCell>
                 <TableCell>{r.brand}</TableCell>
                 <TableCell>{r.category}</TableCell>
@@ -93,6 +111,13 @@ export default function ProductsAdminPage() {
             <TextField label="Brand" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} fullWidth />
             <TextField label="Category" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} fullWidth />
             <TextField label="Price" type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} fullWidth />
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Box component="img" src={form.image || undefined} alt="preview" sx={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 1, bgcolor: 'action.hover' }} />
+              <Button component="label" variant="outlined">
+                Upload Image
+                <input type="file" accept="image/*" hidden onChange={onFile} />
+              </Button>
+            </Stack>
           </Stack>
         </DialogContent>
         <DialogActions>

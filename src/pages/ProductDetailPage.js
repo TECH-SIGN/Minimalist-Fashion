@@ -15,16 +15,21 @@ import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import CardActions from '@mui/material/CardActions';
 import { Link } from 'react-router-dom';
-import products from 'shared/data/products';
+import { getAllProducts } from 'services/productsStore';
 import { useCart } from 'state/CartContext';
+import { getGalleryImages, getProductImage, onImgErrorSwap } from 'core/utils/imageForProduct';
 
 function ProductDetailPage() {
   const { id } = useParams();
   const { addItem } = useCart();
-  const product = products.find((p) => String(p.id) === String(id));
-  const images = React.useMemo(() =>
-    Array.from({ length: 5 }).map((_, i) => `https://picsum.photos/seed/${product?.id || 'p'}-${i}/800/600`),
-  [product?.id]);
+  const [all, setAll] = React.useState(getAllProducts());
+  React.useEffect(() => {
+    const onUpdate = () => setAll(getAllProducts());
+    window.addEventListener('products:updated', onUpdate);
+    return () => window.removeEventListener('products:updated', onUpdate);
+  }, []);
+  const product = React.useMemo(() => all.find((p) => String(p.id) === String(id)), [all, id]);
+  const images = React.useMemo(() => getGalleryImages(product, 5, { w: 800, h: 600 }), [product]);
   const [active, setActive] = React.useState(0);
   const [color, setColor] = React.useState(product?.color || '');
   const [size, setSize] = React.useState(product?.size || '');
@@ -39,6 +44,7 @@ function ProductDetailPage() {
           src={images[active]}
           alt={product.title}
           loading="lazy"
+          onError={(e) => onImgErrorSwap(e, product, { w: 800, h: 600, index: active })}
           sx={{
             width: '100%',
             height: 420,
@@ -57,6 +63,7 @@ function ProductDetailPage() {
               alt={`${product.title} ${i + 1}`}
               loading="lazy"
               onClick={() => setActive(i)}
+              onError={(e) => onImgErrorSwap(e, product, { w: 800, h: 600, index: i })}
               sx={{
                 width: 70,
                 height: 70,
@@ -103,24 +110,37 @@ function ProductDetailPage() {
       <Grid item xs={12}>
         <Divider sx={{ my: 3 }} />
         <Typography variant="h6" sx={{ mb: 2 }}>Related Products</Typography>
-        <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1 }}>
-          {products
+        <Box sx={{ display: 'flex', gap: 1.5, overflowX: 'auto', pb: 1 }}>
+          {all
             .filter((p) => p.category === product.category && p.id !== product.id)
             .slice(0, 10)
             .map((rp) => (
-              <Card key={rp.id} sx={{ minWidth: 220, flex: '0 0 auto', transition: 'transform .2s ease, box-shadow .2s ease', '&:hover': { transform: 'translateY(-3px)', boxShadow: 6 } }}>
+              <Card
+                key={rp.id}
+                sx={{
+                  minWidth: 160,
+                  maxWidth: 160,
+                  flex: '0 0 auto',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 2,
+                  transition: 'transform .2s ease, box-shadow .2s ease',
+                  '&:hover': { transform: 'translateY(-2px)', boxShadow: 3 },
+                }}
+              >
                 <CardMedia
                   component="img"
-                  src={`https://picsum.photos/seed/rel-${rp.id}/600/600`}
+                  src={getProductImage(rp, { w: 400, h: 300, index: 0 })}
                   alt={rp.title}
                   loading="lazy"
-                  sx={{ aspectRatio: '1 / 1', bgcolor: 'action.hover', objectFit: 'cover', width: '100%' }}
+                  onError={(e) => onImgErrorSwap(e, rp, { w: 400, h: 300, index: 0 })}
+                  sx={{ height: 120, bgcolor: 'action.hover', objectFit: 'cover', width: '100%' }}
                 />
-                <CardContent>
-                  <Typography variant="subtitle2" noWrap>{rp.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">${rp.price.toFixed(2)}</Typography>
+                <CardContent sx={{ py: 1, px: 1 }}>
+                  <Typography variant="subtitle2" noWrap sx={{ fontSize: '0.9rem' }}>{rp.title}</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>${rp.price.toFixed(2)}</Typography>
                 </CardContent>
-                <CardActions>
+                <CardActions sx={{ pt: 0, px: 1, pb: 1 }}>
                   <Button component={Link} to={`/product/${rp.id}`} size="small">View</Button>
                   <Button size="small" onClick={() => addItem(rp, 1)} variant="contained">Add</Button>
                 </CardActions>

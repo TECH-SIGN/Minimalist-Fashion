@@ -11,9 +11,11 @@ import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from 'state/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPass, setShowPass] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
@@ -21,16 +23,29 @@ export default function LoginPage() {
 
   const validEmail = (e) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError('');
     if (!validEmail(form.email)) { setError('Please enter a valid email.'); return; }
     if (!form.password) { setError('Password is required.'); return; }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      setLoading(true);
+      await new Promise((r) => setTimeout(r, 250));
+      const raw = localStorage.getItem('auth:creds');
+      if (!raw) { setError('No account found. Please sign up first.'); return; }
+      let saved;
+      try { saved = JSON.parse(raw); } catch { saved = null; }
+      if (!saved || saved.email !== form.email || saved.password !== form.password) {
+        setError('Invalid email or password.');
+        return;
+      }
+      await login({ email: form.email });
       navigate('/');
-    }, 700);
+    } catch (err) {
+      setError(err?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

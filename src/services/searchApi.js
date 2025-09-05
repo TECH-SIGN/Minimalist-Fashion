@@ -1,12 +1,10 @@
-import products from 'shared/data/products';
+import { getAllTitles as getDynamicTitles } from 'services/productsStore';
 import { delay } from 'core/utils/delay';
 import { httpGet } from 'services/http/client';
 
 const RECENT_KEY = 'recent-searches';
 
-function getAllTitles() {
-  return products.map((p) => p.title);
-}
+function getAllTitles() { return getDynamicTitles(); }
 
 export function getRecentSearches(limit = 6) {
   try {
