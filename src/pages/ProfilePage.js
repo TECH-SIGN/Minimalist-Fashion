@@ -23,6 +23,11 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
+import EmailIcon from '@mui/icons-material/EmailOutlined';
+import PhoneIcon from '@mui/icons-material/PhoneOutlined';
+import LocationOnIcon from '@mui/icons-material/LocationOnOutlined';
 import { Link } from 'react-router-dom';
 import { useWishlist } from 'state/WishlistContext';
 
@@ -79,134 +84,124 @@ function ProfilePage() {
   };
 
   return (
-    <Box sx={{ py: 3 }}>
-      <Typography variant="h5" sx={{ mb: 2 }}>My Account</Typography>
-      <Tabs value={tab} onChange={(_, v) => setTab(v)}>
-        <Tab label="Orders" />
-        <Tab label="Wishlist" />
-        <Tab label="Addresses" />
-        <Tab label="Settings" />
-      </Tabs>
-
-      {/* Orders */}
-      <TabPanel value={tab} index={0}>
-        <TableContainer component={Paper}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Order #</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Items</TableCell>
-                <TableCell align="right">Total</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {orders.map((o) => (
-                <TableRow key={o.id} hover>
-                  <TableCell>
-                    <Button component={Link} to={`/orders/${o.id}`} size="small">{o.id}</Button>
-                  </TableCell>
-                  <TableCell>{o.date}</TableCell>
-                  <TableCell>{o.items}</TableCell>
-                  <TableCell align="right">${o.total.toFixed(2)}</TableCell>
-                  <TableCell>{o.status}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
-
-      {/* Wishlist */}
-      <TabPanel value={tab} index={1}>
-        {wishlist.length === 0 ? (
-          <Stack alignItems="center" spacing={1} sx={{ py: 4, color: 'text.secondary' }}>
-            <FavoriteBorderIcon />
-            <Typography>No items in wishlist</Typography>
-          </Stack>
-        ) : (
-          <Grid container spacing={2} sx={{ mt: 0 }}>
-            {wishlist.map((p) => (
-              <Grid key={p.id} item xs={12} sm={6} md={4}>
-                <Paper variant="outlined" sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <img alt={p.title} src={`https://picsum.photos/seed/${p.id}/120/90`} width={96} height={72} style={{ borderRadius: 8, objectFit: 'cover' }} loading="lazy" />
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="subtitle2" noWrap title={p.title}>{p.title}</Typography>
-                    <Typography variant="body2" color="text.secondary">${p.price?.toFixed?.(2) ?? p.price}</Typography>
-                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                      <Button size="small" component={Link} to={`/product/${p.id}`}>View</Button>
-                      <Button size="small" color="error" onClick={() => toggle(p)}>Remove</Button>
-                    </Stack>
-                  </Box>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </TabPanel>
-
-      {/* Addresses */}
-      <TabPanel value={tab} index={2}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Typography variant="subtitle1">Saved Addresses</Typography>
-          <Button variant="contained" onClick={openNewAddr}>Add Address</Button>
+    <Box sx={{ py: 4 }}>
+      {/* Centered Profile Card */}
+      <Paper elevation={0} sx={{
+        mx: 'auto', p: { xs: 3, md: 4 }, maxWidth: 900,
+        borderRadius: 4, border: '1px solid', borderColor: 'divider',
+        boxShadow: (t) => t.shadows[2],
+        background: (t) => t.palette.mode === 'light' ? 'linear-gradient(180deg, #FFFFFF, #F8FAFC)' : t.palette.background.paper,
+      }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems={{ xs: 'center', sm: 'flex-start' }}>
+          <Avatar sx={{ width: 104, height: 104, boxShadow: 1 }} src={`https://i.pravatar.cc/200?img=5`} />
+          <Box sx={{ flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
+            <Typography variant="h4" sx={{ fontFamily: 'Playfair Display, serif', fontWeight: 700 }}>John Doe</Typography>
+            <Stack direction="row" spacing={1} justifyContent={{ xs: 'center', sm: 'flex-start' }} sx={{ mt: 0.5 }}>
+              <Chip label="@johndoe" size="small" variant="outlined" />
+              <Chip label="Member" size="small" color="primary" variant="soft" sx={{ display: { xs: 'none', sm: 'inline-flex' } }} />
+            </Stack>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, maxWidth: 560 }}>
+              Minimal style enthusiast. Loving clean lines, neutral tones, and timeless basics.
+            </Typography>
+            <Stack direction="row" spacing={1.5} justifyContent={{ xs: 'center', sm: 'flex-start' }} sx={{ mt: 2 }}>
+              <Button variant="contained">Edit Profile</Button>
+              <Button variant="text" component={Link} to="/orders">View Orders</Button>
+            </Stack>
+          </Box>
         </Stack>
-        <Stack spacing={2}>
-          {addresses.map((a) => (
-            <Paper key={a.id} variant="outlined" sx={{ p: 2 }}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Box>
-                  <Typography variant="subtitle2">{a.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">{a.line1}</Typography>
-                  <Typography variant="body2" color="text.secondary">{[a.city, a.state, a.zip].filter(Boolean).join(', ')}</Typography>
-                  <Typography variant="body2" color="text.secondary">{a.country}</Typography>
-                </Box>
-                <Box>
-                  <IconButton size="small" onClick={() => openEditAddr(a)} aria-label="edit address"><EditIcon fontSize="small" /></IconButton>
-                  <IconButton size="small" color="error" onClick={() => deleteAddr(a.id)} aria-label="delete address"><DeleteIcon fontSize="small" /></IconButton>
-                </Box>
+      </Paper>
+
+      {/* Sections Grid */}
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        {/* Personal Details */}
+        <Grid item xs={12} md={4}>
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3, height: '100%', transition: 'all .2s ease', '&:hover': { boxShadow: 3, transform: 'translateY(-2px)' } }}>
+            <Typography variant="subtitle1" sx={{ mb: 1.5 }}>Personal Details</Typography>
+            <Stack spacing={1.25}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <EmailIcon fontSize="small" />
+                <Typography variant="body2">john@example.com</Typography>
               </Stack>
-            </Paper>
-          ))}
-        </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <PhoneIcon fontSize="small" />
+                <Typography variant="body2">+1 (555) 242-9000</Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <LocationOnIcon fontSize="small" />
+                <Typography variant="body2">London, United Kingdom</Typography>
+              </Stack>
+            </Stack>
+          </Paper>
+        </Grid>
 
-        <Dialog open={addrOpen} onClose={() => setAddrOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>{addrForm.id ? 'Edit Address' : 'Add Address'}</DialogTitle>
-          <DialogContent>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <TextField label="Label" placeholder="Home / Office" value={addrForm.name} onChange={(e) => setAddrForm({ ...addrForm, name: e.target.value })} />
-              <TextField label="Address Line" value={addrForm.line1} onChange={(e) => setAddrForm({ ...addrForm, line1: e.target.value })} />
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}><TextField label="City" fullWidth value={addrForm.city} onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })} /></Grid>
-                <Grid item xs={12} sm={3}><TextField label="State" fullWidth value={addrForm.state} onChange={(e) => setAddrForm({ ...addrForm, state: e.target.value })} /></Grid>
-                <Grid item xs={12} sm={3}><TextField label="ZIP" fullWidth value={addrForm.zip} onChange={(e) => setAddrForm({ ...addrForm, zip: e.target.value })} /></Grid>
+        {/* Order History */}
+        <Grid item xs={12} md={8}>
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3, transition: 'all .2s ease', '&:hover': { boxShadow: 3 } }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+              <Typography variant="subtitle1">Order History</Typography>
+              <Button component={Link} to="/orders" size="small">View All</Button>
+            </Stack>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Order #</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Items</TableCell>
+                    <TableCell align="right">Total</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {orders.slice(0, 4).map((o) => (
+                    <TableRow key={o.id} hover sx={{ transition: 'background .2s ease' }}>
+                      <TableCell>
+                        <Button component={Link} to={`/orders/${o.id}`} size="small">{o.id}</Button>
+                      </TableCell>
+                      <TableCell>{o.date}</TableCell>
+                      <TableCell>{o.items}</TableCell>
+                      <TableCell align="right">${o.total.toFixed(2)}</TableCell>
+                      <TableCell>{o.status}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Grid>
+
+        {/* Wishlist */}
+        <Grid item xs={12}>
+          <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+              <Typography variant="subtitle1">Wishlist</Typography>
+              <Typography variant="body2" color="text.secondary">{wishlist.length} items</Typography>
+            </Stack>
+            {wishlist.length === 0 ? (
+              <Stack alignItems="center" spacing={1} sx={{ py: 4, color: 'text.secondary' }}>
+                <FavoriteBorderIcon />
+                <Typography>No items in wishlist</Typography>
+              </Stack>
+            ) : (
+              <Grid container spacing={2} sx={{ mt: 0 }}>
+                {wishlist.map((p) => (
+                  <Grid key={p.id} item xs={12} sm={6} md={3}>
+                    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2.5, transition: 'all .2s ease', '&:hover': { boxShadow: 3, transform: 'translateY(-2px)' } }}>
+                      <img alt={p.title} src={`https://picsum.photos/seed/${p.id}/320/220`} width="100%" height={160} style={{ borderRadius: 10, objectFit: 'cover' }} loading="lazy" />
+                      <Typography variant="subtitle2" noWrap title={p.title} sx={{ mt: 1 }}>{p.title}</Typography>
+                      <Typography variant="body2" color="text.secondary">${p.price?.toFixed?.(2) ?? p.price}</Typography>
+                      <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                        <Button size="small" component={Link} to={`/product/${p.id}`}>View</Button>
+                        <Button size="small" color="error" onClick={() => toggle(p)}>Remove</Button>
+                      </Stack>
+                    </Paper>
+                  </Grid>
+                ))}
               </Grid>
-              <TextField label="Country" value={addrForm.country} onChange={(e) => setAddrForm({ ...addrForm, country: e.target.value })} />
-            </Stack>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setAddrOpen(false)}>Cancel</Button>
-            <Button variant="contained" onClick={saveAddr}>Save</Button>
-          </DialogActions>
-        </Dialog>
-      </TabPanel>
-
-      {/* Settings */}
-      <TabPanel value={tab} index={3}>
-        <Paper variant="outlined" sx={{ p: 2, maxWidth: 520 }}>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>Profile Settings</Typography>
-          <Divider sx={{ mb: 2 }} />
-          <Stack spacing={2}>
-            <TextField label="Full Name" value={settings.name} onChange={(e) => setSettings({ ...settings, name: e.target.value })} />
-            <TextField label="Email" type="email" value={settings.email} onChange={(e) => setSettings({ ...settings, email: e.target.value })} />
-            <Stack direction="row" spacing={1}>
-              <Button variant="contained" onClick={saveSettings}>Save</Button>
-              <Button component={Link} to="/orders" variant="text">View Orders</Button>
-            </Stack>
-          </Stack>
-        </Paper>
-      </TabPanel>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

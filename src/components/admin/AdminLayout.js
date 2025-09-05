@@ -38,7 +38,6 @@ export default function AdminLayout() {
   const pathnames = location.pathname.split('/').filter(Boolean);
 
   React.useEffect(() => {
-    // When breakpoint changes, default to open on desktop and closed on mobile unless user set a preference
     const saved = localStorage.getItem('adminSidebarOpen');
     if (saved === null) {
       setOpen(!isMobile);

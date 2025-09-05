@@ -2,6 +2,7 @@
 import baseProducts, { facets as staticFacets } from 'shared/data/products';
 
 const LS_KEY = 'products:custom';
+const LS_DELETED_KEY = 'products:deleted';
 
 function readCustom() {
   try {
@@ -24,13 +25,36 @@ function writeCustom(list) {
   }
 }
 
+function readDeleted() {
+  try {
+    const raw = localStorage.getItem(LS_DELETED_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeDeleted(ids) {
+  try {
+    localStorage.setItem(LS_DELETED_KEY, JSON.stringify(ids || []));
+    if (typeof window !== 'undefined' && window.dispatchEvent) {
+      window.dispatchEvent(new CustomEvent('products:updated'));
+    }
+  } catch {
+    // ignore write errors
+  }
+}
+
 export function getAllProducts() {
   const custom = readCustom();
+  const deleted = new Set(readDeleted());
   // Custom first, then base (avoid duplicate ids by preferring custom)
-  const baseById = new Map(baseProducts.map((p) => [String(p.id), p]));
-  const merged = [...custom];
+  const merged = [...custom.filter((p) => !deleted.has(String(p.id)))];
   for (const p of baseProducts) {
-    if (!custom.some((c) => String(c.id) === String(p.id))) merged.push(p);
+    const id = String(p.id);
+    if (deleted.has(id)) continue;
+    if (!custom.some((c) => String(c.id) === id)) merged.push(p);
   }
   return merged;
 }
@@ -47,8 +71,24 @@ export function upsertProduct(product) {
 
 export function removeProduct(id) {
   const list = readCustom();
-  const updated = list.filter((p) => String(p.id) !== String(id));
-  writeCustom(updated);
+  const sid = String(id);
+  const existsInCustom = list.some((p) => String(p.id) === sid);
+  if (existsInCustom) {
+    const updated = list.filter((p) => String(p.id) !== sid);
+    writeCustom(updated);
+  } else {
+    // Base product: tombstone it
+    const deleted = readDeleted();
+    if (!deleted.includes(sid)) {
+      deleted.push(sid);
+      writeDeleted(deleted);
+    } else {
+      // still dispatch so UI refreshes
+      if (typeof window !== 'undefined' && window.dispatchEvent) {
+        window.dispatchEvent(new CustomEvent('products:updated'));
+      }
+    }
+  }
 }
 
 export function replaceAllCustomProducts(items) {
