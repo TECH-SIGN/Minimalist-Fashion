@@ -90,6 +90,7 @@ function ProductsPage() {
   const [dataVersion, setDataVersion] = React.useState(0);
 
   const q = searchParams.get('q') || '';
+  const categoryParam = searchParams.get('category') || '';
 
   const pageSize = 12;
 
@@ -115,12 +116,23 @@ function ProductsPage() {
     fetchFacets().then((f) => setAvailable({ categories: f.categories, brands: f.brands }));
   }, []);
 
+  // Keep filters in sync with category from URL query (e.g., /products?category=Fashion)
+  React.useEffect(() => {
+    if (!categoryParam) return;
+    // Only update if different to avoid reset loops
+    const curr = (filters.categories && filters.categories[0]) || '';
+    if (curr !== categoryParam) {
+      setFilters((prev) => ({ ...prev, categories: [categoryParam] }));
+      setPage(1);
+    }
+  }, [categoryParam]);
+
   return (
     <Box sx={{ py: 3 }}>
       <FilterSidebar open={drawerOpen} onClose={() => setDrawerOpen(false)} filters={filters} setFilters={setFilters} available={available} />
       <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2, px: 1 }}>
         <IconButton onClick={() => setDrawerOpen(true)}><TuneIcon /></IconButton>
-        <Typography variant="h6" sx={{ flex: 1 }}>Products</Typography>
+        <Typography variant="h6" sx={{ flex: 1 }}>{categoryParam ? `${categoryParam}` : 'Products'}</Typography>
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel id="sort-label">Sort by</InputLabel>
           <Select labelId="sort-label" label="Sort by" value={sort} onChange={(e) => setSort(e.target.value)}>

@@ -7,6 +7,7 @@ const ProfilePage = React.lazy(() => import('../pages/ProfilePage'));
 const WishlistPage = React.lazy(() => import('../pages/WishlistPage'));
 const CartPage = React.lazy(() => import('../pages/CartPage'));
 const CheckoutPage = React.lazy(() => import('../pages/CheckoutPage'));
+const OrdersPage = React.lazy(() => import('../pages/OrdersPage'));
 
 // Fallbacks
 const NotFoundPage = React.lazy(() => import('../pages/NotFoundPage'));
@@ -18,6 +19,7 @@ const userRoutes = [
   { path: '/wishlist', element: <WishlistPage /> },
   { path: '/cart', element: <CartPage /> },
   { path: '/checkout', element: <CheckoutPage /> },
+  { path: '/orders', element: <OrdersPage /> },
   // Global catch-all (for non-admin unmatched routes)
   { path: '*', element: <NotFoundPage /> },
 ];

@@ -18,56 +18,56 @@ function AdminDashboardPage() {
     <Grid container spacing={2} sx={{ py: 1 }}>
       {/* KPI Cards */}
       <Grid item xs={12} md={3}>
-        <Paper sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 2 }}>
+        <Paper variant="outlined" sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 3 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{ p: 0.75, borderRadius: 2, bgcolor: 'primary.light', color: 'primary.dark' }}>
               <ShoppingCartIcon />
             </Box>
             <Box>
-              <Typography variant="overline" color="text.secondary">Orders</Typography>
-              <Typography variant="h5">1,284</Typography>
+              <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 0.6 }}>ORDERS</Typography>
+              <Typography variant="h5" sx={{ lineHeight: 1.2 }}>1,284</Typography>
               <Chip size="small" color="success" icon={<ArrowUpwardIcon />} label="+4.1%" sx={{ mt: 0.25 }} />
             </Box>
           </Stack>
         </Paper>
       </Grid>
       <Grid item xs={12} md={3}>
-        <Paper sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 2 }}>
+        <Paper variant="outlined" sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 3 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{ p: 0.75, borderRadius: 2, bgcolor: 'success.light', color: 'success.dark' }}>
               <MonetizationOnIcon />
             </Box>
             <Box>
-              <Typography variant="overline" color="text.secondary">Revenue</Typography>
-              <Typography variant="h5">$84,230</Typography>
+              <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 0.6 }}>REVENUE</Typography>
+              <Typography variant="h5" sx={{ lineHeight: 1.2 }}>$84,230</Typography>
               <Chip size="small" color="success" icon={<ArrowUpwardIcon />} label="+7.3%" sx={{ mt: 0.25 }} />
             </Box>
           </Stack>
         </Paper>
       </Grid>
       <Grid item xs={12} md={3}>
-        <Paper sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 2 }}>
+        <Paper variant="outlined" sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 3 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{ p: 0.75, borderRadius: 2, bgcolor: 'warning.light', color: 'warning.dark' }}>
               <PeopleIcon />
             </Box>
             <Box>
-              <Typography variant="overline" color="text.secondary">New Users</Typography>
-              <Typography variant="h5">392</Typography>
+              <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 0.6 }}>NEW USERS</Typography>
+              <Typography variant="h5" sx={{ lineHeight: 1.2 }}>392</Typography>
               <Chip size="small" color="error" icon={<ArrowDownwardIcon />} label="-1.2%" sx={{ mt: 0.25 }} />
             </Box>
           </Stack>
         </Paper>
       </Grid>
       <Grid item xs={12} md={3}>
-        <Paper sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 2 }}>
+        <Paper variant="outlined" sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 3 }}>
           <Stack direction="row" alignItems="center" spacing={1.5}>
             <Box sx={{ p: 0.75, borderRadius: 2, bgcolor: 'info.light', color: 'info.dark' }}>
               <InventoryIcon />
             </Box>
             <Box>
-              <Typography variant="overline" color="text.secondary">Low Stock</Typography>
-              <Typography variant="h5">21</Typography>
+              <Typography variant="overline" sx={{ color: 'text.secondary', letterSpacing: 0.6 }}>LOW STOCK</Typography>
+              <Typography variant="h5" sx={{ lineHeight: 1.2 }}>21</Typography>
               <Chip size="small" variant="outlined" label="Monitor" sx={{ mt: 0.25 }} />
             </Box>
           </Stack>
@@ -76,7 +76,7 @@ function AdminDashboardPage() {
 
       {/* Charts / Content */}
       <Grid item xs={12} md={8}>
-        <Paper sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 2, height: '100%' }}>
+        <Paper variant="outlined" sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 3, height: '100%' }}>
           <Typography variant="h6" sx={{ mb: 1 }}>Sales Overview</Typography>
           <Divider sx={{ mb: 1.5 }} />
           <Box sx={{ height: 220, bgcolor: 'background.default', border: '1px dashed', borderColor: 'divider', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -85,7 +85,7 @@ function AdminDashboardPage() {
         </Paper>
       </Grid>
       <Grid item xs={12} md={4}>
-        <Paper sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 2, height: '100%' }}>
+        <Paper variant="outlined" sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 3, height: '100%' }}>
           <Typography variant="h6" sx={{ mb: 1 }}>Recent Activity</Typography>
           <Divider sx={{ mb: 1.5 }} />
           <Stack spacing={1.25}>

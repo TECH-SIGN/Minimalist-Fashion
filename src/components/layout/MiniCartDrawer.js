@@ -53,7 +53,7 @@ export default function MiniCartDrawer() {
             <Typography variant="subtitle1">Subtotal</Typography>
             <Typography variant="subtitle1">${subtotal.toFixed(2)}</Typography>
           </Box>
-          <Button fullWidth variant="contained" onClick={() => { setMiniCartOpen(false); navigate('/checkout'); }}>Checkout</Button>
+          <Button fullWidth variant="outlined" onClick={() => { setMiniCartOpen(false); navigate('/checkout'); }}>Checkout</Button>
         </Box>
       </Drawer>
       <Snackbar open={!!lastRemoved} onClose={() => setLastRemoved(null)} autoHideDuration={4000}>

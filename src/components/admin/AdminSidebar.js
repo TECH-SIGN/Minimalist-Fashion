@@ -19,8 +19,8 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import Tooltip from '@mui/material/Tooltip';
 
-const drawerWidth = 240;
-const railWidth = 72;
+const drawerWidth = 280;
+const railWidth = 96;
 
 export default function AdminSidebar({ open, onClose }) {
   const { pathname } = useLocation();
@@ -52,11 +52,14 @@ export default function AdminSidebar({ open, onClose }) {
             boxSizing: 'border-box',
             borderRight: '1px solid',
             borderColor: 'divider',
+            // Offset below AppBar (56px mobile, 64px desktop); rail only shows on md+
+            top: { xs: 56, sm: 64 },
+            height: { xs: 'calc(100% - 56px)', sm: 'calc(100% - 64px)' },
           },
         }}
       >
         <Box sx={{ px: 2, py: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>E-Shop Admin</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Minimalist Fashion Admin</Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'block', md: 'none' } }}>Manage store</Typography>
         </Box>
         <Divider />
@@ -104,11 +107,13 @@ export default function AdminSidebar({ open, onClose }) {
             boxSizing: 'border-box',
             borderRight: '1px solid',
             borderColor: 'divider',
+            // Overlay covers the AppBar for smooth slide-in
+            zIndex: (t) => t.zIndex.modal + 1,
           },
         }}
       >
         <Box sx={{ px: 2, py: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>E-Shop Admin</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Minimalist Fashion Admin</Typography>
         <Typography variant="caption" color="text.secondary">Manage store</Typography>
       </Box>
       <Divider />
@@ -117,7 +122,7 @@ export default function AdminSidebar({ open, onClose }) {
           const active = pathname === it.to || pathname.startsWith(it.to + '/');
           return (
             <ListItem key={it.to} disablePadding>
-              <Tooltip title="" placement="right" arrow>
+              <Tooltip title={it.label} placement="right" arrow>
                 <ListItemButton
                   component={Link}
                   to={it.to}

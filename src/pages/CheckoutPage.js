@@ -10,6 +10,9 @@ import TextField from '@mui/material/TextField';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Radio from '@mui/material/Radio';
+import FormLabel from '@mui/material/FormLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
@@ -37,7 +40,13 @@ function CheckoutPage() {
     save: true,
   });
   const [delivery, setDelivery] = React.useState('standard');
-  const [payment, setPayment] = React.useState({ name: '', card: '', exp: '', cvv: '' });
+  const [paymentMethod, setPaymentMethod] = React.useState('card'); // 'card' | 'upi' | 'netbanking' | 'wallet'
+  const [payment, setPayment] = React.useState({
+    name: '', card: '', exp: '', cvv: '',
+    vpa: '', // upi id
+    bank: '', // net banking
+    wallet: '', // wallet name
+  });
   const [error, setError] = React.useState('');
 
   const shippingCost = delivery === 'express' ? 14.99 : delivery === 'next' ? 24.99 : 0;
@@ -56,12 +65,26 @@ function CheckoutPage() {
       if (!delivery) { setError('Please select a delivery method.'); return false; }
     }
     if (activeStep === 2) {
-      const { name, card, exp, cvv } = payment;
-      if (![name, card, exp, cvv].every((v) => String(v).trim())) { setError('Please complete your payment details.'); return false; }
-      const digits = card.replace(/\D/g, '');
-      if (digits.length < 12) { setError('Card number looks too short.'); return false; }
-      if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp)) { setError('Expiry must be MM/YY.'); return false; }
-      if (!/^\d{3,4}$/.test(cvv)) { setError('CVV must be 3 or 4 digits.'); return false; }
+      if (!paymentMethod) { setError('Please select a payment method.'); return false; }
+      if (paymentMethod === 'card') {
+        const { name, card, exp, cvv } = payment;
+        if (![name, card, exp, cvv].every((v) => String(v).trim())) { setError('Please complete your card details.'); return false; }
+        const digits = card.replace(/\D/g, '');
+        if (digits.length < 12) { setError('Card number looks too short.'); return false; }
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(exp)) { setError('Expiry must be MM/YY.'); return false; }
+        if (!/^\d{3,4}$/.test(cvv)) { setError('CVV must be 3 or 4 digits.'); return false; }
+      } else if (paymentMethod === 'upi') {
+        const { vpa } = payment;
+        if (!String(vpa).trim()) { setError('Please enter your UPI ID.'); return false; }
+        // simple UPI pattern user@bank
+        if (!/^[-._a-zA-Z0-9]+@[-._a-zA-Z0-9]+$/.test(vpa)) { setError('Please enter a valid UPI ID (e.g., name@bank).'); return false; }
+      } else if (paymentMethod === 'netbanking') {
+        const { bank } = payment;
+        if (!String(bank).trim()) { setError('Please select your bank for Net Banking.'); return false; }
+      } else if (paymentMethod === 'wallet') {
+        const { wallet } = payment;
+        if (!String(wallet).trim()) { setError('Please select a digital wallet.'); return false; }
+      }
     }
     return true;
   };
@@ -107,12 +130,64 @@ function CheckoutPage() {
   );
 
   const PaymentForm = (
-    <Grid container spacing={2}>
-      <Grid item xs={12}><TextField label="Name on card" value={payment.name} onChange={(e) => setPayment({ ...payment, name: e.target.value })} fullWidth required /></Grid>
-      <Grid item xs={12}><TextField label="Card number" value={payment.card} onChange={(e) => setPayment({ ...payment, card: e.target.value })} inputProps={{ inputMode: 'numeric' }} fullWidth required /></Grid>
-      <Grid item xs={6}><TextField label="Expiry (MM/YY)" value={payment.exp} onChange={(e) => setPayment({ ...payment, exp: e.target.value })} placeholder="MM/YY" fullWidth required /></Grid>
-      <Grid item xs={6}><TextField label="CVV" value={payment.cvv} onChange={(e) => setPayment({ ...payment, cvv: e.target.value })} inputProps={{ inputMode: 'numeric', maxLength: 4 }} fullWidth required /></Grid>
-    </Grid>
+    <Stack spacing={2}>
+      <Box>
+        <FormLabel id="payment-method">Payment Method</FormLabel>
+        <RadioGroup row aria-labelledby="payment-method" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+          <FormControlLabel value="card" control={<Radio />} label="Card" />
+          <FormControlLabel value="upi" control={<Radio />} label="UPI" />
+          <FormControlLabel value="netbanking" control={<Radio />} label="Net Banking" />
+          <FormControlLabel value="wallet" control={<Radio />} label="Wallet" />
+        </RadioGroup>
+      </Box>
+
+      {paymentMethod === 'card' && (
+        <Grid container spacing={2}>
+          <Grid item xs={12}><TextField label="Name on card" value={payment.name} onChange={(e) => setPayment({ ...payment, name: e.target.value })} fullWidth required /></Grid>
+          <Grid item xs={12}><TextField label="Card number" value={payment.card} onChange={(e) => setPayment({ ...payment, card: e.target.value })} inputProps={{ inputMode: 'numeric' }} fullWidth required /></Grid>
+          <Grid item xs={6}><TextField label="Expiry (MM/YY)" value={payment.exp} onChange={(e) => setPayment({ ...payment, exp: e.target.value })} placeholder="MM/YY" fullWidth required /></Grid>
+          <Grid item xs={6}><TextField label="CVV" value={payment.cvv} onChange={(e) => setPayment({ ...payment, cvv: e.target.value })} inputProps={{ inputMode: 'numeric', maxLength: 4 }} fullWidth required /></Grid>
+        </Grid>
+      )}
+
+      {paymentMethod === 'upi' && (
+        <Grid container spacing={2}>
+          <Grid item xs={12}><TextField label="UPI ID (e.g., name@bank)" value={payment.vpa} onChange={(e) => setPayment({ ...payment, vpa: e.target.value })} fullWidth required /></Grid>
+          <Grid item xs={12}><Alert severity="info">You will be redirected to your UPI app to authorize the payment.</Alert></Grid>
+        </Grid>
+      )}
+
+      {paymentMethod === 'netbanking' && (
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <Select fullWidth displayEmpty value={payment.bank} onChange={(e) => setPayment({ ...payment, bank: e.target.value })}>
+              <MenuItem value=""><em>Select Bank</em></MenuItem>
+              <MenuItem value="HDFC">HDFC Bank</MenuItem>
+              <MenuItem value="ICICI">ICICI Bank</MenuItem>
+              <MenuItem value="SBI">State Bank of India</MenuItem>
+              <MenuItem value="AXIS">Axis Bank</MenuItem>
+              <MenuItem value="KOTAK">Kotak Mahindra</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item xs={12}><Alert severity="info">You will be redirected to your bank's secure login page.</Alert></Grid>
+        </Grid>
+      )}
+
+      {paymentMethod === 'wallet' && (
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <Select fullWidth displayEmpty value={payment.wallet} onChange={(e) => setPayment({ ...payment, wallet: e.target.value })}>
+              <MenuItem value=""><em>Select Wallet</em></MenuItem>
+              <MenuItem value="Paytm">Paytm</MenuItem>
+              <MenuItem value="PhonePe">PhonePe</MenuItem>
+              <MenuItem value="AmazonPay">Amazon Pay</MenuItem>
+              <MenuItem value="GooglePay">Google Pay</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item xs={12}><Alert severity="info">You will be redirected to your wallet to complete payment.</Alert></Grid>
+        </Grid>
+      )}
+    </Stack>
   );
 
   const Review = (
@@ -127,6 +202,13 @@ function CheckoutPage() {
         ))}
       </Stack>
       <Divider />
+      <Typography variant="subtitle2">Payment</Typography>
+      <Typography variant="body2">
+        {paymentMethod === 'card' && `Card ending ****${payment.card.replace(/\D/g, '').slice(-4) || '____'}`}
+        {paymentMethod === 'upi' && `UPI • ${payment.vpa || '—'}`}
+        {paymentMethod === 'netbanking' && `Net Banking • ${payment.bank || '—'}`}
+        {paymentMethod === 'wallet' && `Wallet • ${payment.wallet || '—'}`}
+      </Typography>
       <Stack direction="row" justifyContent="space-between"><Typography>Subtotal</Typography><Typography>${subtotal.toFixed(2)}</Typography></Stack>
       <Stack direction="row" justifyContent="space-between"><Typography>Shipping</Typography><Typography>{shippingCost ? `$${shippingCost.toFixed(2)}` : 'Free'}</Typography></Stack>
       <Stack direction="row" justifyContent="space-between"><Typography variant="h6">Total</Typography><Typography variant="h6">${total.toFixed(2)}</Typography></Stack>
@@ -164,9 +246,9 @@ function CheckoutPage() {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
               <Button disabled={activeStep === 0} onClick={handleBack}>Back</Button>
               {activeStep < steps.length - 1 ? (
-                <Button variant="contained" onClick={handleNext}>Next</Button>
+                <Button variant="outlined" onClick={handleNext}>Next</Button>
               ) : (
-                <Button variant="contained" color="primary" onClick={placeOrder} disabled={!items.length}>Place Order</Button>
+                <Button variant="outlined" color="primary" onClick={placeOrder} disabled={!items.length}>Place Order</Button>
               )}
             </Box>
           )}

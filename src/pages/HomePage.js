@@ -215,7 +215,7 @@ function HomePage() {
       <Container maxWidth="lg" sx={{ py: 5 }}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={3}>
-            <Typography variant="h4" sx={{ mb: 1 }}>Élan</Typography>
+            <Typography variant="h4" sx={{ mb: 1 }}>Minimalist Fashion</Typography>
             <Typography variant="body2" color="text.secondary">Modern essentials with a luxury touch.</Typography>
           </Grid>
           <Grid item xs={6} md={3}>

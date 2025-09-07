@@ -172,8 +172,11 @@ function Header() {
         ) : (
           <>
             <IconButton color="inherit" onClick={(e) => setMenuEl(e.currentTarget)} aria-label="account">
-              <Avatar sx={{ width: 28, height: 28 }}>
-                {(user.name || user.email || 'U').slice(0, 1).toUpperCase()}
+              <Avatar
+                src={user?.avatar || undefined}
+                sx={{ width: 32, height: 32, boxShadow: 1, border: '1px solid', borderColor: 'divider' }}
+              >
+                {(!user?.avatar) && (user.name || user.email || 'U').slice(0, 1).toUpperCase()}
               </Avatar>
             </IconButton>
             <Menu anchorEl={menuEl} open={Boolean(menuEl)} onClose={() => setMenuEl(null)}>
